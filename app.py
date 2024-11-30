@@ -1,52 +1,32 @@
-
+import os
 from flask import Flask, render_template, jsonify, request, session
 from flask_caching import Cache
 from langchain_community.llms import DeepInfra
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-import numpy as np
-import sys
-import re
-import os
-import random
-import time
-import requests
-from langdetect import detect, LangDetectException
-from concurrent.futures import ThreadPoolExecutor
+from transformers import pipeline
 from pdfminer.high_level import extract_text
-import spacy
-from sentence_transformers import SentenceTransformer, util
-from spacy import cli
+import time
+import re
+from langdetect import detect, LangDetectException
+import requests
 
 # Initialize Flask app and cache
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'your_secret_key'
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
-# Initialize DeepInfra API
+# Initialize DeepInfra API (Switch to lighter models)
 os.environ["DEEPINFRA_API_TOKEN"] = 'fCUq30zmzPgZJMKx2Z8kUB7HB2cgC374'
-llm = DeepInfra(model_id="meta-llama/Meta-Llama-3-70B-Instruct")
+llm = DeepInfra(model_id="meta-llama/Meta-Llama-3-70B-Instruct")  # You can switch this to a lighter model
 llm.model_kwargs = {
     "temperature": 0.7,
     "repetition_penalty": 1.2,
     "top_p": 0.9,
 }
 
-# Initialize sentence transformer model (smaller and faster model)
-retrieval_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")  # Faster model for embeddings
-
-# Load SpaCy model lazily to reduce memory usage
-nlp = None
-
-def load_spacy_model():
-    global nlp
-    if nlp is None:
-        try:
-            nlp = spacy.load("en_core_web_sm")
-        except OSError:
-            print("SpaCy model 'en_core_web_sm' not found. Installing...")
-            cli.download("en_core_web_sm")
-            nlp = spacy.load("en_core_web_sm")
+# Initialize a lightweight question-answering pipeline from Hugging Face (DistilBERT)
+qa_pipeline = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
 
 # Function to extract text from PDF using pdfminer.six
 def extract_text_from_pdf(pdf_path):
@@ -56,56 +36,34 @@ def extract_text_from_pdf(pdf_path):
 
     extraction_time = end_time - start_time
     print(f"Text extraction took {extraction_time:.2f} seconds.")
-
+    
     return text.strip()
 
-# Function to split text into chunks
+# Function to split text into chunks (simple sentence split by punctuation)
 def split_into_chunks(text, chunk_size=1024):
-    load_spacy_model()  # Ensure SpaCy is loaded
+    sentences = text.split('. ')
     chunks = []
     current_chunk = []
-    current_length = 0
 
-    for sentence in nlp(text).sents:
-        sentence_text = sentence.text.strip()
-        if current_length + len(sentence_text) > chunk_size:
-            if current_chunk:
-                chunks.append(" ".join(current_chunk))
-            current_chunk = [sentence_text]
-            current_length = len(sentence_text)
-        else:
-            current_chunk.append(sentence_text)
-            current_length += len(sentence_text)
+    for sentence in sentences:
+        current_chunk.append(sentence)
+        if len(' '.join(current_chunk)) > chunk_size:
+            chunks.append(' '.join(current_chunk))
+            current_chunk = []
 
     if current_chunk:
-        chunks.append(" ".join(current_chunk))
+        chunks.append(' '.join(current_chunk))
 
     return chunks
 
-# Function to process chunks in parallel to speed up embedding generation
-def process_chunks_in_parallel(chunks):
-    chunk_batches = [chunks[i:i + 10] for i in range(0, len(chunks), 10)]
-
-    def process_batch(batch):
-        return retrieval_model.encode(batch, convert_to_tensor=True)
-
-    with ThreadPoolExecutor() as executor:
-        results = list(executor.map(process_batch, chunk_batches))
-
-    return [item for sublist in results for item in sublist]
-
-def retrieve_relevant_context_parallel(chunks, query, top_k=5):
-    query_embedding = retrieval_model.encode([query], convert_to_tensor=True)
-    chunk_embeddings = retrieval_model.encode(chunks, convert_to_tensor=True)
-
-    scores = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
-    scores = scores.tolist()
-    top_results = sorted(zip(range(len(scores)), scores), key=lambda x: x[1], reverse=True)[:top_k]
-
-    relevant_chunks = [chunks[idx] for idx, score in top_results]
-    return relevant_chunks
-
-import re
+# Function to process chunks sequentially to save memory
+def process_chunks_sequentially(chunks, question):
+    answers = []
+    for chunk in chunks:
+        # Use the qa_pipeline to get the answer for each chunk
+        answer = qa_pipeline(context=chunk, question=question)["answer"]
+        answers.append(answer)
+    return answers
 
 def sanitize_answer(answer):
     # Remove any special characters (e.g., backticks, extra spaces, etc.)
@@ -121,15 +79,14 @@ def detect_language(question):
     except LangDetectException:
         return 'en'  # Default to English if language detection fails
 
-# Modify the generate_response_with_deepinfra function to consider language
-def generate_response_with_deepinfra(context, question, language='en'):
+# Function to generate response with DeepInfra based on context and question
+def generate_response_with_deepinfra(context, question, language):
     prompt = f"""
     Based on the following context, provide a clear, concise, and direct response to the question in no more than 2-3 sentences. 
     If the question is generic or asked repeatedly, the answer should still be brief (2-3 lines), ensuring consistency in the response for such questions. 
     The answer should be polite and informative, but avoid unnecessary details. 
     If no relevant context is found, provide general information related to GMR Hyderabad Airport. 
-    The answer must be limited to 2-3 lines, and should not be more than that.
-    If the question is not have any proper context and information regard then don't provide any random answer just say i can't understand like that text 
+    The answer must be limited to 4 lines, and should not be more than that.
     If the question is asked in Hindi, Telugu, or Urdu, provide the answer in the respective language.
 
     Context: {context}
@@ -138,64 +95,69 @@ def generate_response_with_deepinfra(context, question, language='en'):
 
     Answer:
     """
-
     prompt_template = PromptTemplate(input_variables=["context", "question"], template=prompt)
     chain = LLMChain(llm=llm, prompt=prompt_template)
     response = chain.run(context=context, question=question)
 
     # Translate the response to the detected language if needed
     if language == 'hi':
-        # Translate to Hindi (use an external library or API for translation)
-        # For now, you can just simulate the translation with a placeholder
-        response = f"= {response}"
+        # Placeholder for Hindi translation
+        response = f"यह उत्तर है: {response}"
     elif language == 'te':
-        # Translate to Telugu
-        response = f" {response}"
+        # Placeholder for Telugu translation
+        response = f"ఇది సమాధానం: {response}"
     elif language == 'ur':
-        # Translate to Urdu
-        response = f"{response}"
-    
+        # Placeholder for Urdu translation
+        response = f"یہ جواب ہے: {response}"
+
     # Sanitize the response before returning it
     return sanitize_answer(response)
+
+# Function to check if the question is generic
+def is_generic_question(question):
+    generic_keywords = {"hello", "hi", "hey", "how are you", "good morning", "good afternoon", "good evening", "goodbye", "thanks", "thank you", "bye", "see you"}
+    question_lower = question.strip().lower()
+    return question_lower in generic_keywords or len(question.split()) < 3
 
 @app.route('/qa/query', methods=['POST'])
 def get_answer():
     try:
         # Get the JSON data sent from the client
         data = request.get_json()
+        print("Received data:", data)  # Debugging line
 
         # Extract the 'question' from the received JSON
         question = data.get('question')
+        print("Question:", question)  # Debugging line
 
         if not question:
             return jsonify({'error': 'No question provided'}), 400
 
         # Detect the language of the question
         language = detect_language(question)
+        print(f"Detected language: {language}")  # Debugging line
 
-        # Process the question and generate the answer (use your existing logic)
+        # Process the question and generate the answer
         pdf_path = r"AirportData.pdf"  # Change this to your PDF path
-        context = ""
+        if not os.path.exists(pdf_path):
+            raise FileNotFoundError(f"The PDF file at {pdf_path} does not exist.")
 
         # If it's a generic question, return a short answer directly
         if is_generic_question(question):
-            answer = generate_response_with_deepinfra(context, question, language)
+            answer = generate_response_with_deepinfra("", question, language)
         else:
             document_text = extract_text_from_pdf(pdf_path)
             chunks = split_into_chunks(document_text)
-            context = retrieve_relevant_context_parallel(chunks, question)
-            # Generate the response using DeepInfra
-            answer = generate_response_with_deepinfra(context, question, language)
+            print(f"Chunks: {chunks[:2]}")  # Log first two chunks for debugging
+            context = process_chunks_sequentially(chunks, question)  # Sequential chunk processing
+            answer = generate_response_with_deepinfra(" ".join(context), question, language)
 
         return jsonify({'answer': answer})
 
     except Exception as e:
+        print(f"Error: {e}")  # Log the error
         return jsonify({'error': str(e)}), 500
 
-# Utility function to determine if a question is generic
-def is_generic_question(question):
-    generic_keywords = ["hello", "hi", "help", "thank you", "goodbye"]
-    return any(keyword in question.lower() for keyword in generic_keywords)
 
 
 @app.route('/')
