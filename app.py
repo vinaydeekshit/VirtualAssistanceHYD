@@ -18,7 +18,7 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Initialize DeepInfra API (Switch to lighter models)
 os.environ["DEEPINFRA_API_TOKEN"] = 'fCUq30zmzPgZJMKx2Z8kUB7HB2cgC374'
-llm = DeepInfra(model_id="meta-llama/Meta-Llama-3-70B-Instruct")  # You can switch this to a lighter model
+llm = DeepInfra(model_id="meta-llama/Meta-Llama-3-8B-Instruct")  # You can switch this to a lighter model
 llm.model_kwargs = {
     "temperature": 0.7,
     "repetition_penalty": 1.2,
