@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Assistant</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            /* overflow: hidden; */
+            flex-wrap: wrap;
+
+        }
+        .flight-form-container {
+    background-color: #f9f9f9; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    padding: 20px 15px; /* Reduced padding */
+    margin-top: 10px; 
+    max-width: 600px; /* Reduced width */
+    width: 100%;
+    text-align: center; 
+    font-size: 14px; /* Optional: smaller text */
+}
+
+
+.flight-form-container h2 {
+    font-size: 14px;
+    color: #333; 
+    margin-bottom: 15px; 
+}
+
+.flight-form-container input[type="text"] {
+    width: 100%; 
+    padding: 12px; 
+    border: 2px solid #ddd; 
+    border-radius: 5px; 
+    font-size: 14px; 
+    margin-bottom: 20px; 
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.flight-form-container input[type="text"]:focus {
+    border-color: #007BFF; 
+}
+
+.flight-form-container button[type="submit"] {
+    padding: 12px 20px; 
+    background-color: #007BFF;
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    font-size: 14px;
+    cursor: pointer; 
+    width: 100%; 
+    transition: background-color 0.3s; 
+}
+
+.flight-form-container button[type="submit"]:hover {
+    background-color: #0056b3; 
+}
+
+.flight-form-container .disclaimer {
+    font-size: 14px; 
+    color: #555; 
+    margin-bottom: 15px; 
+}
+
+.flight-form-container .disclaimer a {
+    color: #007BFF; 
+    text-decoration: none; 
+}
+
+.flight-form-container .disclaimer a:hover {
+    text-decoration: underline; 
+}
+
+.distance-info {
+    margin-top: 20px; 
+    font-size: 14px; 
+    color: #333; 
+    font-weight: bold;
+}
+
+        .container {
+            display: flex;
+            align-items: center;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .image-section {
+            flex: 1;
+            padding: 0;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .image-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .content-section {
+    flex: 1;
+    padding: 10px 20px; 
+    margin-top: -50px; 
+}
+
+.content-section h1 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    margin-top: 10px; 
+}
+
+.content-section p {
+    color: #666;
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 16px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.features div {
+    text-align: center;
+    padding: 8px; 
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.features div:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.features div p {
+    font-size: 14px; 
+    color: #666; 
+}
+
+        .input-section {
+            margin-top: 20px;
+            background-color: #eee;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .input-section input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .disclaimer {
+            text-align: center;
+            font-size: 1rem;
+        }
+        .disclaimer input {
+            margin-right: 1rem;
+        }
+        .distance-info {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        .features div {
+    font-size: 14px;
+}
+
+@media (max-width:768px) {
+    body{
+        overflow: hidden;
+        overflow-y: hidden;
+        /* padding: 1.2rem; */
+    }
+    .image-section img{
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+    .image-section{
+        height: 40vh;
+        width: 100%;
+        /* border: solid 1px red;/ */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* overflow: visible; */
+    }
+    
+    .features{
+        gap:0px;
+    }
+    .content-section{
+        padding: 0;
+        margin: 0;
+    }
+    .content-section p{
+        font-size: 1rem;
+        text-align: center;
+    }
+    .content-section h4{
+        margin: 1rem;
+    }
+    .content-section h1{
+        font-size: 1.2rem;
+        margin: 1rem;
+    }
+}
+
+
+
+    </style>
+    <script>
+        function calcCrow(lat1, lon1, lat2, lon2) {
+            var R = 6371; 
+            var dLat = toRad(lat2 - lat1);
+            var dLon = toRad(lon2 - lon1);
+            var lat1 = toRad(lat1);
+            var lat2 = toRad(lat2);
+
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2); 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+            var d = R * c; 
+            return d;
+        }
+
+        function toRad(Value) {
+            return Value * Math.PI / 180;
+        }
+
+        function checkLocation(callback) {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const airportLat = 17.2403;
+                        const airportLng = 78.4294;
+                        let distanceBetween = calcCrow(lat, lng, airportLat, airportLng).toFixed(1);
+                        document.getElementById('distanceInfo').innerText = `Distance to Rajiv Gandhi International Airport: ${distanceBetween} km`;
+
+                        if (distanceBetween <= 700) {
+                            callback(true); 
+                        } else {
+                            callback(false); 
+                        }
+                    },
+                    (error) => {
+                        console.error("Error getting user location:", error);
+                        alert('Unable to get your device location. Access denied. Please ensure your location is turned ON.');
+                        callback(false); 
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                console.error("Geolocation is not supported by this browser.");
+                alert('Geolocation is not supported by this browser. Access denied.');
+                callback(false); 
+            }
+        }
+
+        function handleFlightSubmit(event) {
+            event.preventDefault();
+
+            console.log(event)
+
+            checkLocation((accessGranted) => {
+                if (!accessGranted) {
+                    alert('Access denied. You are not within the allowed range. You have access up to 6 km radius from Rajiv Gandhi airport');
+                    return;
+                }
+
+                const flightNumber = document.getElementById('flightNumberInput').value.trim();
+                const flightNumberMatch = flightNumber.match(/\b[a-zA-Z0-9]{1,2}\s?[0-9]{0,4}\b/i);
+                console.log(flightNumber,flightNumberMatch);
+
+                if (flightNumberMatch!="" || flightNumberMatch!=null) {
+                    const validPrefixes = ["G9", "AI", "QP", "UL", "IX", "AK", "BA", "BZ", "EY", "FZ", "QO", "GF", "I5", "6E", "J9", "KU", "9I", "MH", "DD", "WY", "OV", "QR", "S5", "SG", "SQ", "SV", "TG", "EK", "UK", "ZZ", "GA"];
+                    const prefix = flightNumber.match(/^[a-zA-Z0-9]{1,2}/)[0].toUpperCase();
+
+                    if (validPrefixes.includes(prefix)) {
+                        localStorage.setItem('flightNumber', flightNumber);
+
+                        fetch('/store_boarding_gate_status', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ flno: flightNumber })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            localStorage.setItem('gateStatus', data.gateStatus); 
+                            localStorage.setItem('boardingPercent', data.boardingPercent);
+                            window.location.href = '/index'; 
+                        })
+                        .catch(error => {
+                            console.error('Error sending flight number to API:', error);
+                            alert('Error fetching flight status.');
+                        });
+                    } else {
+                        alert('Please enter a valid flight number.');
+                    }
+                } else {
+                    alert('Please enter a valid flight number.');
+                }
+            });
+        }
+
+        function toggleSubmitButton() {
+            const checkbox = document.getElementById('agreeCheckbox');
+            const submitButton = document.getElementById('submitButton');
+            if (checkbox.checked && document.getElementById('flightNumberInput').value.trim() !== "") {
+                submitButton.classList.add('enabled');
+                submitButton.disabled = false;
+            } else {
+                submitButton.classList.remove('enabled');
+                submitButton.disabled = true;
+            }
+        }
+
+        function validateForm() {
+            toggleSubmitButton();
+        }
+
+        window.onload = function() {
+            document.getElementById('flightNumberInput').addEventListener('input', validateForm);
+            document.getElementById('agreeCheckbox').addEventListener('change', validateForm);
+        };
+
+      
+
+    </script>
+</head>
+<body>
+   
+    <div class="image-section">
+        <img id="exampleimg" src="{{ url_for('static', filename='images/VA.jpg') }}">
+    </div>
+    <div class="content-section">
+        <h1>Virtual Assistant</h1>
+        <p>Our Virtual Assistant provides real-time information and support to make your journey through Rajiv Gandhi International Airport.</p>
+        <h4>Features</h4>
+        <div class="features">
+            <div>Flight Status</div>
+            <div>Wait time</div>
+            <div>WiFi</div>
+            <div>2D Navigation</div>
+            <div>Airport Facilities</div>
+            <div>Food & Beverages</div>
+            <div>Retail</div>
+            <div>Convenience and Relax</div>
+            <div>Transport Facilities</div>
+            <div>Pushpak Bus Timings</div>
+           
+        </div>
+        <div class="flight-form-container">
+            <h2>Enter the flight Number to Access Virtual Assistant</h2>
+            <form onsubmit="handleFlightSubmit(event)">
+                <input type="text" id="flightNumberInput" placeholder="Enter Flight No" required>
+                <div class="disclaimer">
+                    <input type="checkbox" id="agreeCheckbox">
+                    <label for="agreeCheckbox">By proceeding with this chat, you agree to our <a href="https://www.hyderabad.aero/privacy-policy.aspx" target="_blank">privacy policy</a> and the <a href="https://www.hyderabad.aero/terms-conditions.aspx" target="_blank">terms and conditions</a> of using this website and chatbot.</label><br><br>
+                </div>
+                <button type="submit" id="submitButton">START</button>
+            </form>
+            <div id="distanceInfo" class="distance-info"></div>
+        </div>
+        </div>
+</body>
+</html>

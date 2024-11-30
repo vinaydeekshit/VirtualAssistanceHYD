@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map Navigation</title>
+  <link href="https://cdn.jsdelivr.net/npm/@mappedin/mappedin-js@beta/lib/index.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+
+    #mappedin-map {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+
+    #level-selector-container,
+    #destination-input-container {
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s;
+    }
+
+    #level-selector-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+    }
+
+    #destination-input-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .mappedin-logo, .feedback-button {
+      display: none !important;
+  }
+
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      background-color: #ffffff;
+      transition: border 0.3s;
+    }
+
+    select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    #navigate-btn {
+      margin-top: 10px;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #navigate-btn:hover {
+      background-color: #0056b3;
+    }
+
+    
+    .boarding-gate {
+      color: #28a745;
+      /* Green for boarding gates */
+    }
+
+    .shop {
+      color: #17a2b8;
+      /* Blue for shops */
+    }
+  </style>
+</head>
+
+<body>
+ 
+
+  <!-- Removed Floor Selector -->
+  <!-- <div id="level-selector-container">
+    <label for="floor-selector">Select Level:</label>
+    <select id="floor-selector"></select>
+  </div> -->
+
+  <div id="mappedin-map"></div>
+
+  <script type="module">
+    import {
+        getMapData,
+        show3dMap,
+    } from "https://cdn.jsdelivr.net/npm/@mappedin/mappedin-js@beta/lib/esm/index.js";
+  
+    const options = {
+      key: "mik_oqy57cVIEhCWAr42m54460735",
+      secret: "mis_z9663xUkEMus5O5iDKgJxinHhmqL5LsbU6F1Z8y9Cvs844c1000",
+      mapId: "66e91ac5af770b000b9080c7",
+    };
+  
+    let lng;
+    let lat;
+    let marker;
+  
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                lat = position.coords.latitude;
+                lng = position.coords.longitude;
+            });
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
+    }
+  
+    getMapData(options).then(async (mapData) => {
+        getLocation();
+        const mapView = await show3dMap(
+    document.getElementById("mappedin-map"),
+    mapData,
+    { showLogo: false }
+);
+
+  
+        // Initialize the map to Level 1
+        mapView.setFloor("m_3f04bdf06f04b1ac");
+  
+        // Automatically select and navigate to the gate based on the URL
+        const selectGateFromUrl = () => {
+            const currentPath = window.location.pathname;
+            const pathSegments = currentPath.split("/");
+            const gateNumber = pathSegments[pathSegments.length - 1]; // Get the last part of the URL
+            const gateValue = "Gate " + gateNumber.padStart(2, '0'); // Format the gate as "Gate 09" if necessary
+            console.log("Gate Number to navigate to:", gateValue);
+  
+            // Find destination by space name
+            const destination = mapData.getByType("space").find((s) => s.name === gateValue);
+            if (!destination) {
+                console.log(`Destination "${gateValue}" not found!`);
+                return;
+            }
+  
+            console.log(`Navigating to: ${destination.name}`);
+  
+            // Get directions from current location to the destination
+            const directions = mapView.getDirections(
+                {
+                    floorId: "m_3f04bdf06f04b1ac",
+                    latitude: lat,
+                    longitude: lng,
+                    __type: "coordinate",
+                },
+                destination
+            );
+  
+            if (directions) {
+                mapView.Navigation.draw(directions, {
+                    pathOptions: {
+                        nearRadius: 1.5,
+                        farRadius: 2,
+                    },
+                });
+            }
+        };
+  
+        selectGateFromUrl();
+  
+        // Update marker on location change
+        setInterval(() => {
+            getLocation();
+  
+            if (marker) {
+                mapView.Markers.animateTo(marker, {
+                    floorId: "m_3f04bdf06f04b1ac",
+                    latitude: lat,
+                    longitude: lng,
+                    __type: "coordinate",
+                });
+            } else {
+                marker = mapView.Markers.add(
+                    {
+                        floorId: "m_3f04bdf06f04b1ac",
+                        latitude: lat,
+                        longitude: lng,
+                        __type: "coordinate",
+                    },
+                    "me",
+                    {
+                        interactive: true,
+                        anchor: "left",
+                        rank: "always-visible",
+                    }
+                );
+            }
+        }, 4000);
+    });
+  </script>
+  
+</body>
+
+
+</html>

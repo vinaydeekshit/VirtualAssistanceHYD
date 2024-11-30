@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMR Airport</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f7f3f3;
+            overflow-x: hidden;
+        }
+        @media (max-width: 768px) {
+    #currentDateTime {
+        display: none;
+    }
+}
+
+
+        .nav {
+            height: 9vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #424874;
+            padding: .3rem 2rem;
+            width: 100%;
+            font-size:1rem;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            height: 15%;
+            width:80%;
+            margin-top:280px;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 70%;
+            margin-top: 20px;
+        }
+
+        .left,
+        .right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left img {
+            max-width: 85%;
+            max-height: auto;
+        }
+
+        .right {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .right h1,
+        .right h3 {
+            margin-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .right h1 {
+            font-size: 29px;
+            max-width: 20em;
+            transform: scale(0.94);
+            animation: scale 3s forwards cubic-bezier(0.5, 1, 0.89, 1);
+        }
+
+        .right h3 {
+            font-size: 15px;
+            max-width: 50ch;
+            transform: scale(0.94);
+            animation: scale 3s forwards cubic-bezier(0.5, 1, 0.89, 1);
+        }
+
+        @keyframes scale {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .right span {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(4px);
+        }
+
+        .right span:nth-child(n) {
+            animation: fade-in 0.8s forwards cubic-bezier(0.11, 0, 0.5, 0);
+            animation-delay: calc(0.1s * var(--i));
+        }
+
+        @keyframes fade-in {
+            to {
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        .right button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .menu-icon {
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        .right button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            .right h1 {
+                font-size: 24px;
+            }
+
+            .right h3 {
+                font-size: 14px;
+            }
+
+            .right button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 230px;
+            height: 100%;
+            background: linear-gradient(to bottom, #91c3f8 0%, #ffffff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            transition: left 0.3s ease-in-out;
+            z-index: 1000;
+        }
+
+        .sidebar a {
+            color: black;
+            text-decoration: none;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .subcategory {
+            display: none;
+            flex-direction: column;
+            margin-left: 1rem;
+        }
+
+        .sidebar a.sub-link {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 100%;
+            }
+
+            .right h1 {
+                font-size: 20px;
+            }
+
+            .right h3 {
+                font-size: 12px;
+            }
+
+            .right button {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+
+        .faq-section {
+    width: 90%;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: rgb(247, 249, 250);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.faq-section h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #424874;
+    font-family: 'Poppins', sans-serif; 
+}
+
+.faq-item {
+    margin-bottom: 20px; 
+    background-color: #ffffff; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+   
+}
+
+.faq-question {
+    cursor: pointer;
+    padding: 15px 20px; 
+    position: relative; 
+    font-size: 17px; 
+    font-family: 'Poppins', sans-serif; 
+}
+
+.faq-question h3 {
+    font-size: 15px; 
+    color: #333;
+    margin: 0;
+    font-family: 'Poppins', sans-serif; 
+}
+
+.faq-question::after {
+    content: "\25B6"; 
+    font-size: 14px; 
+    position: absolute;
+    top: 50%;
+    right: 20px; 
+    transform: translateY(-50%);
+    transition: transform 0.3s ease;
+}
+
+.faq-question.active::after {
+    transform: translateY(-50%) rotate(90deg); 
+}
+
+.faq-answer {
+    display: none;
+    padding: 10px 20px; 
+    font-size: 15px; 
+    font-family: 'Poppins', sans-serif; 
+}
+
+@media (max-width: 768px) {
+    .faq-section {
+        width: 90%;
+        padding: 10px;
+    }
+    .logo{
+        height: 15%;
+        width:80%;
+        margin-top:280px;
+    }
+
+    .faq-section h2 {
+        font-size: 24px;
+    }
+
+    .faq-question h3 {
+        font-size: 16px;
+    }
+
+    .faq-question::after {
+        font-size: 12px;
+    }
+
+    .faq-answer {
+        font-size: 14px;
+    }
+}
+
+
+
+
+
+        .contact-section {
+            width: 100%;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .contact-form {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .contact-section h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #424874;
+        }
+
+        .contact-form form {
+            display: flex;
+            flex-direction: column;
+        }
+        .icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+
+}
+
+        .contact-form input,
+        .contact-form textarea {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .contact-form button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .contact-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .follow-contact-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .follow-us,
+        .additional-contact-info {
+            flex: 1;
+            min-width: 300px;
+            margin: 10px;
+        }
+
+        .follow-us h2,
+        .additional-contact-info h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #424874;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .social-links a {
+            text-decoration: none;
+            color: #424874;
+            font-size: 24px;
+        }
+
+        .social-links img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .social-links a:hover {
+            color: #0056b3;
+        }
+
+        .additional-contact-info {
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .additional-contact-info p {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+
+
+
+        .notification {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background:rgb(129, 218, 129); 
+    color: black;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+    border-radius: 1.5rem;
+    border-color: white;
+}
+
+
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
+}
+
+.dialog-box {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh; 
+    overflow-y: auto; 
+    position: relative;
+    z-index: 1001; 
+}
+
+
+.dialog-box .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+
+
+#formContainer {
+    padding: 0;
+    margin: 0;
+}
+
+
+h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.button-group button {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.button-group button:hover {
+    background: #0056b3;
+}
+
+.form-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%; 
+}
+
+.form-item span {
+    font-size: 1.5rem;
+}
+
+form input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex: 1; 
+}
+
+form button {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 100%; 
+}
+
+form button:hover {
+    background: #0056b3;
+}
+
+.result-container {
+    text-align: center;
+}
+
+#copyButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#copyButton:hover {
+    background: #0056b3;
+}
+
+
+#photoPreview {
+    width: 100%;
+    max-width: 150px; 
+    max-height: 150px; 
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin-top: 1rem;
+    display: none;
+    object-fit: cover; 
+}
+
+#passportPreview {
+    width: 100%;
+    max-width: 150px; 
+    max-height: 150px; 
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin-top: 1rem;
+    display: none;
+    object-fit: cover; 
+}
+
+#passportValidated {
+    color: green;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    display: none;
+}
+
+#passportNotValidated {
+    color: red;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    display: none;
+    
+}
+
+#videoContainer {
+    display: none;
+    margin-top: 1rem;
+}
+
+#passportVideoContainer {
+    display: none;
+    margin-top: 1rem;
+}
+
+#video {
+    width: 100%;
+    max-width: 300px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+}
+
+#passportVideo {
+    width: 100%;
+    max-width: 300px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+}
+
+#captureButton {
+    display: block;
+    margin: 1rem auto;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#passportCaptureButton {
+    display: block;
+    margin: 1rem auto;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#uploadImageContainer {
+    margin-top: 1rem;
+}
+
+#uploadImage {
+    display: block;
+    margin: 1rem auto;
+}
+
+#loadingSpinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <span class="menu-icon" onclick="toggleSidebar()">☰ Menu</span>
+        <span id="currentDateTime" style="color: white;"></span>
+    </nav>
+    <div class="sidebar" id="sidebar">
+        <a href="javascript:scrollToTop(); window.location.reload(true);">
+            <img src="{{ url_for('static', filename='images/home.png') }}" alt="Home Icon" class="icon"> HOME
+        </a>
+        <a href="{{ url_for('navigation') }}">
+            <img src="{{ url_for('static', filename='images/navigation.png') }}" alt="Navigation Icon" class="icon"> NAVIGATION
+        </a>
+        
+        <a href="{{ url_for('static', filename='passenger guide doc/PASSENGER GUIDE1.pdf') }}" target="_blank">
+            <img src="{{ url_for('static', filename='images/book.png') }}" alt="Guide Icon" class="icon"> PASSENGER GUIDE
+        </a>
+        <a href="#faqs">
+            <img src="{{ url_for('static', filename='images/qa.png') }}" alt="FAQ Icon" class="icon"> FAQ'S
+        </a>
+        <a href="#contact-us">
+            <img src="{{ url_for('static', filename='images/phone.png') }}" alt="Contact Icon" class="icon"> CONTACT US
+        </a>
+        <img src="{{ url_for('static', filename='images/Airportlogo.png') }}" class="logo">
+    </div>
+    
+
+    <div class="container">
+        <div class="left">
+            <img src="static/images/chatbot.png" alt="Airport Image">
+        </div>
+        <div class="right">
+            <h1>
+                <span style="--i: 1;">Welcome</span> <span style="--i: 2;">to</span> <span style="--i: 3;">Hyderabad</span>
+                <span style="--i: 4;">Airport</span> <span style="--i: 5;">Assistance</span>
+            </h1>
+            <h3>
+                <span style="--i: 6;">Your</span> <span style="--i: 7;">personal</span> <span style="--i: 8;">assistant</span>
+                <span style="--i: 9;">for</span> <span style="--i: 10;">a</span> <span style="--i: 11;">smooth</span>
+                <span style="--i: 12;">travel</span> <span style="--i: 13;">experience</span>
+            </h3>
+            <button onclick="redirectToChat()">Chat with us</button><br><br>
+    
+            <h1>Connect to Airport Wifi</h1>
+            <button onclick="showDialog()">Generate WiFi Coupon</button><br><br>
+    
+            <!-- Flight Status Form -->
+            <h1>Check Flight Status</h1>
+            <button onclick="showFlightStatusForm()">Check Flight Status</button><br>
+    
+            <!-- Flight Status Form -->
+            <div id="flightStatusForm" style="display: none;">
+                <label for="flightNumber">Flight Number:</label>
+                <input type="text" id="flightNumber" placeholder="Enter flight number" required><br><br>
+    
+                <label for="flightType">Flight Type:</label>
+                <select id="flightType" required>
+                    <option value="Arr">Arrival</option>
+                    <option value="Dep">Departure</option>
+                </select><br><br>
+    
+                <!-- Date is fixed to current date -->
+                <input type="hidden" id="flightDate"> <!-- Read-only field for the current date -->
+    
+                <button onclick="submitFlightStatus()">Submit</button>
+            </div>
+    
+            <!-- Display the response here -->
+            <div id="flightStatusResponse" style="margin-top: 20px;"></div>
+    
+            <!-- Modal Dialog for displaying flight details -->
+            <div id="flightDetailsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid #ccc; padding: 20px; z-index: 1000;">
+                <h2>Flight Status Details</h2>
+                <div id="modalContent"></div>
+                <button onclick="closeModal()">Close</button>
+                <!-- Navigate Button -->
+                <button onclick="navigateToPage()">Navigate</button>
+            </div>
+    
+            <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification" style="display:none;"></div>
+
+    <div class="dialog-overlay" id="wifiDialog" style="display: none;">
+        <div class="dialog-box">
+            <button class="close-btn" onclick="hideDialog()">&times;</button>
+            <div id="wifiFormContainer">
+                <div class="container" id="formContainer">
+                    <h2>Passenger Details</h2>
+                    <div class="button-group">
+                        <button type="button" onclick="showPNR()">Domestic</button>
+                        <button type="button" onclick="showFlightNo()">International</button>
+                    </div>
+                    <form id="passengerForm" onsubmit="return handleSubmit(event)">
+                        <div class="form-item" id="pnrField" style="display:none;">
+                            <span class="material-icons-outlined">confirmation_number</span>
+                            <input type="text" name="pnr" id="pnr" placeholder="Enter PNR">
+                        </div>
+                        <div class="form-item" id="uploadFileFieldDomestic" style="display:none;">
+                            <p>Please Upload Your Boarding Pass</p><br>
+                            <span class="material-icons-outlined">attach_file</span>
+                            <input type="file" name="uploadFileDomestic" id="uploadFileDomestic">
+                        </div>
+                        <div class="form-item" id="flightNoField" style="display:none;">
+                            <span class="material-icons-outlined">flight</span>
+                            <input type="text" name="flightNo" id="flightNo" placeholder="Enter Flight No">
+                        </div>
+                        <div class="form-item" id="uploadFileFieldInternational" style="display:none;">
+                            <p>Please Upload Your Boarding Pass</p><br>
+                            <span class="material-icons-outlined">attach_file</span>
+                            <input type="file" name="uploadFileInternational" id="uploadFileInternational">
+                        </div>
+                        <div class="form-item" id="photoField" style="display:none;">
+                            <p>Please provide Your photo</p>
+                            <span class="material-icons-outlined">photo_camera</span>
+                            <button type="button" onclick="openCamera()">Open Camera</button>
+                            <div id="videoContainer">
+                                <video id="video" autoplay></video>
+                                <button type="button" id="captureButton" onclick="takePhoto()">Take Photo</button>
+                            </div>
+                            <img id="photoPreview" src="" alt="Photo Preview">
+                            <span id="photoValidated">✔ Validated</span>
+                        </div>
+                        <div class="form-item" id="passportField">
+                            <p>Please provide Your passport photo</p>
+                            <span class="material-icons-outlined">photo_camera</span>
+                            <button type="button" onclick="openPassportCamera()">Open Camera</button>
+                             <span id="flipCameraSymbol" onclick="flipCamera()">🔄</span>
+                            <div id="passportVideoContainer">
+                                <video id="passportVideo" autoplay></video>
+                                <button type="button" id="passportCaptureButton" onclick="takePassportPhoto()">Take Passport Photo</button>
+                            </div>
+                            <img id="passportPreview" src="" alt="Passport Preview" style="max-width: 100px; max-height: 100px;">
+                            <span id="passportValidated" style="display:none;">✔ Validated</span>
+                            <span id="passportNotValidated" style="display:none;">✘ Not Validated</span>
+                            <div id="uploadImageContainer" style="display:none;">
+                                <p>Please upload your passport photo</p>
+                                <input type="file" id="uploadImage" accept="image/*" onchange="uploadPassportImage(event)">
+                            </div>
+                            <div id="loadingSpinner" style="display:none;">
+                                <div class="spinner"></div>
+                                <p>Validating...</p>
+                            </div>
+                        </div>
+    
+                        <button type="submit" id="submitButton" style="display:none;">Submit</button>
+                    </form>
+                </div>
+            </div>
+    
+            <div class="container" id="resultContainer" style="display:none;">
+                <div class="result-container">
+                    <div id="loadingIndicator" style="display:none;">Loading...</div>
+                    <div class="result-item">
+                        <strong id="resultMessage"></strong>
+                    </div>
+                    <br>
+                    <button id="copyButton" onclick="copyToClipboard()">Copy to Clipboard</button>
+                </div>
+            </div>
+    
+        </div>
+    </div>
+    
+
+
+    <div id="faqs" class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What are my rights when I fly?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Passengers have rights regarding ticket refunds, baggage claims, and flight cancellations. Check the airline's policy for more details. <a href="https://www.hyderabad.aero/pdf/Passenger-Charter-MoCA-India.pdf" target="_blank">Click here</a>.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How many terminals does RGIA have?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>RGIA has two main terminals: Domestic and International.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I reach the Domestic Terminal?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>You can reach the Domestic Terminal via the airport shuttle service, taxi, or private vehicle.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I reach the International Terminal?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>The International Terminal is accessible by the airport shuttle, taxi, or private vehicle.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What time should I arrive at the airport before my flight?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>It's recommended to arrive at least 2 hours before a domestic flight and 3 hours before an international flight.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is a parent allowed to accompany a child through check-in?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, parents are allowed to accompany their children through check-in and up to the security checkpoint.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is there any Child Care lounge facility at RGIA Hyderabad?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, RGIA Hyderabad offers child care lounges with various facilities for parents and children.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is Wi-Fi facility available at the airport?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, free Wi-Fi is available throughout the airport for passengers.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What are the options to stay around the Airport?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>There are several hotels and accommodations near the airport, including airport hotels and nearby city hotels.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What are the facilities available for passengers with special needs?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Facilities include wheelchair assistance, special restrooms, and dedicated support staff for passengers with reduced mobility.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Are pregnant women required to provide a medical certificate?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Depending on the airline's policy, pregnant women may be required to provide a medical certificate after a certain stage of pregnancy.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is there any waiting room facility at the airport?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, there are waiting rooms and lounges available for passengers.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Does the airport have money exchange facility?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, money exchange facilities are available at the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Can I carry medicines on board?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, you can carry essential medicines on board. Ensure they are in their original packaging and have a prescription if required.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Whom do I contact if I have lost something at the airport?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Contact the airport's lost and found department for assistance.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I reach the International departure terminal from domestic arrivals?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Follow the airport signs or use the airport shuttle service to reach the International departure terminal.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I reach Domestic departure from International arrival?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Use the airport shuttle or follow the airport signs to navigate between terminals.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I travel between terminals at RGIA?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>The airport shuttle service provides transportation between terminals.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Where can I give feedback about RGIA?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Feedback can be given online through the airport's website or at designated feedback kiosks in the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Where can I make an enquiry about RGIA?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Enquiries can be made at the information desks located throughout the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Do you have a visitor’s area at RGIA?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, RGIA has designated visitor areas at international departure terminal side.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is it possible to drop off and pick up someone in front of a terminal?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, there are designated drop-off and pick-up points in front of each terminal.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Does RGIA have smoking areas?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, there are designated smoking areas within the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is there a Cloak room facility at RGIA?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, cloakroom facilities are available for passengers.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Whom do I contact if my checked-in baggage did not arrive?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Contact the airline's baggage service office located in the baggage claim area.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What is the baggage size and weight allowed to be carried in a flight?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Check with your airline for specific baggage size and weight restrictions as they vary by airline.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Where can I check the flight arrival or departure timings?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Flight timings can be checked on the airport's website, mobile app, or at the flight information displays in the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I check routes and get timetable for flights?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Flight routes and timetables can be checked on the airline's website or through the airport's information services.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Does RGIA have Valet Parking Facility?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, RGIA offers valet parking services for passengers.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Can I pre-book a car?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, car rental and pre-booking services are available at the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">How do I plan my onward route from the airport?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>You can use any of the following options:</p>
+                <ul>
+                    <li>Hire a cab from the authorized car rental counters available at Arrivals area</li>
+                    <li>Use the TSRTC city bus service</li>
+                    <li>APSRTC & TSRTC intercity bus service</li>
+                </ul>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What happens if the goods I purchase at the airport are faulty?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Contact the retailer directly or the airport's customer service for assistance with faulty goods purchased at the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Can I use a credit card at the international airport?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, most shops and services at the airport accept credit cards.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Does RGIA Hyderabad have any medical facility?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Yes, medical facilities and emergency services are available at the airport.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Is there any special facility for passengers with reduced mobility (PRM)?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>We have an exclusive drop off zone reserved for passengers with reduced mobility (PRM) along with a separate entry lane, priority Emigration counter and security check lane. Passenger requiring wheelchair assistance are advised to approach respective airlines in advance. Dedicated washrooms for passengers with reduced mobility is available throughout the terminal. Buggy services are available for PRM post security check.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">Can I bring liquor from other states into Telangana?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>There are restrictions on bringing liquor from other states into Telangana. Check local regulations for details.</p>
+            </div>
+        </div>
+    
+        <div class="faq-item">
+            <h3 class="faq-question">What is the penalty for bringing liquor from other states into Telangana?</h3>
+            <div class="faq-answer" style="display: none;">
+                <p>Violating the prohibition on bringing liquor from other states into Telangana, as stated in Section 9 of the Telangana Excise Act, 1968, can result in a punishment ranging from 6 months to 3 years of imprisonment.</p>
+            </div>
+        </div>
+    
+    </div>
+
+    <div id="contact-us" class="contact-section">
+        <div class="contact-form">
+            <h2>Contact Us</h2>
+            <form action="/submit_contact_form" method="POST">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div class="additional-contact-info">
+            <h2>Additional Contact Information</h2>
+            <p>24 x 7 Customer care number: +91-40-66546370</p>
+            <p>Please contact Lost & Found section: +91-40-66606064</p>
+            <p>Email: <a href="mailto:ghiallost&found@gmrgroup.in">ghiallost&found@gmrgroup.in</a></p>
+            <p>Address: Shamshabad, Hyderabad, Telangana 500409</p>
+        </div>
+
+        <div class="follow-contact-container">
+            <div class="follow-us">
+                <h2>Follow Us On</h2>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/rgiahyd/" target="_blank">
+                        <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
+                    </a>
+                    <a href="https://www.facebook.com/HyderabadAirport?mibextid=ZbWKwL" target="_blank">
+                        <img src="{{ url_for('static', filename='images/facebook (2).png') }}" alt="Facebook">
+                    </a>
+                    <a href="https://x.com/RGIAHyd?t=pNRUCrtSfhqJ71TM05pfyw&s=08x.com" target="_blank">
+                        <img src="{{ url_for('static', filename='images/twitter.png') }}" alt="Twitter">
+                    </a>
+                    <a href="https://www.linkedin.com/company/rgiahyd/" target="_blank">
+                        <img src="{{ url_for('static', filename='images/linkdln.png') }}" alt="LinkedIn">
+                    </a>
+                    <a href="https://youtube.com/@rgiahyderabad?si=WTDlo6OlInLI33u_" target="_blank">
+                        <img src="{{ url_for('static', filename='images/youtube.png') }}" alt="YouTube">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+function showFlightStatusForm() {
+    // Set the current date dynamically
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
+    const yyyy = today.getFullYear();
+    const currentDate = `${yyyy}-${mm}-${dd}`; // Format: YYYY-MM-DD
+
+    document.getElementById("flightDate").value = currentDate; // Set the value of the hidden input
+    document.getElementById("flightStatusForm").style.display = "block"; // Show the form
+
+    // Automatically populate the flight number if it exists in session storage
+    const storedFlightNumber = sessionStorage.getItem("flightNumber");
+    if (storedFlightNumber) {
+        document.getElementById("flightNumber").value = storedFlightNumber; // Set the input value
+        document.getElementById("flightNumber").readOnly = true; // Make the input read-only
+        // Optionally, you can automatically submit the flight status if the number is found
+        // submitFlightStatus(); // Uncomment this line to automatically submit
+    } else {
+        document.getElementById("flightNumber").readOnly = false; // Allow input if no stored flight number
+    }
+}
+
+
+// Function to submit the flight status request
+function submitFlightStatus() {
+    var flightNumber = (document.getElementById("flightNumber").value || sessionStorage.getItem("flightNumber")).replace(/\s+/g, ''); // Check session storage if input is empty
+    var flightType = document.getElementById("flightType").value;
+    var flightDate = document.getElementById("flightDate").value; // Get the current date
+
+    if (flightNumber && flightType) {
+        // Prepare the data to send
+        var data = {
+            flightNumber: flightNumber,
+            type: flightType,
+            flightDate: flightDate
+        };
+
+        // Send the data to the backend API
+        fetch('/get_flight_info', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Check if the data is found
+            if (data && Object.keys(data).length > 0) {
+                // Map and order the response data
+                const fieldMapping = {
+                    "EB_FLNO1": "Flight Number",
+                    "ETAI": "EST Time Of Arrival",
+                    "FLTI": "Flight Type",
+                    "ORG3": "Origin",
+                    "STOA": "SCH Time Of Arrival",
+                    "DES3": "Destination",
+                    "LAND": "Actual Time Of Arrival",
+                    "ETDI": "EST Time Of Departure",
+                    "STOD": "SCH Time Of Departure",
+                    "GATE1": "Boarding Gate",
+                    "GATE2": "Boarding Gate 2",
+                    "FirstBag": "First Bag",
+                    "LastBag": "Last Bag"
+                };
+
+                var orderedData = "";
+                for (const key in fieldMapping) {
+                    if (data[key]) {
+                        orderedData += `<strong>${fieldMapping[key]}:</strong> ${data[key]}<br>`;
+                    }
+                }
+
+                // Display the ordered response in the modal
+                document.getElementById("modalContent").innerHTML = orderedData;
+                document.getElementById("flightDetailsModal").style.display = "block"; 
+                document.getElementById("modalOverlay").style.display = "block"; // Show the overlay
+            } else {
+                alert("No flight information found for the given flight number.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("An error occurred while fetching the flight information.");
+        });
+    } else {
+        alert("Please enter the flight number and select the flight type.");
+    }
+}
+
+
+    // Function to close the modal dialog
+    function closeModal() {
+        document.getElementById('flightDetailsModal').style.display = 'none';
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    // JavaScript function to navigate to navigation.html
+    function navigateToPage() {
+        window.location.href = "/navigation";
+    }
+
+let photoValidated = false;
+let videoStream = null;
+let passportStream = null;
+        let usingBackCamera = false;
+
+function openPassportCamera(backCamera = false) {
+    const constraints = {
+        video: {
+            facingMode: backCamera ? { ideal: "environment" } : "user"
+        }
+    };
+    
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+            passportStream = stream;
+            const video = document.getElementById('passportVideo');
+            video.srcObject = stream;
+            video.play();
+            document.getElementById('passportVideoContainer').style.display = 'block';
+            document.getElementById('passportPreview').style.display = 'none';
+            document.getElementById('passportValidated').style.display = 'none';
+            document.getElementById('passportNotValidated').style.display = 'none';
+            document.getElementById('uploadImageContainer').style.display = 'none';
+        })
+        .catch(error => console.error('Error accessing camera for passport:', error));
+}
+
+function flipCamera() {
+    usingBackCamera = !usingBackCamera;
+    if (passportStream) {
+        passportStream.getTracks().forEach(track => track.stop());
+    }
+    openPassportCamera(usingBackCamera);
+}
+
+
+
+function takePassportPhoto() {
+    if (passportStream) {
+        const video = document.getElementById('passportVideo');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const passportPreview = document.getElementById('passportPreview');
+        passportPreview.src = canvas.toDataURL('image/png');
+        passportPreview.style.display = 'block';
+        document.getElementById('passportVideoContainer').style.display = 'none';
+        passportStream.getTracks().forEach(track => track.stop()); // Stop video stream
+        passportStream = null;
+
+        validatePassport(canvas.toDataURL('image/png'));
+    }
+}
+
+function uploadPassportImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const passportPreview = document.getElementById('passportPreview');
+            passportPreview.src = e.target.result;
+            passportPreview.style.display = 'block';
+            validatePassport(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function validatePassport(imageData) {
+    document.getElementById('loadingSpinner').style.display = 'flex'; 
+
+    Tesseract.recognize(
+        imageData,
+        'eng'
+    ).then(({ data: { text } }) => {
+        document.getElementById('loadingSpinner').style.display = 'none'; 
+        const validationResults = validateText(text);
+        if (validationResults.isValid) {
+            document.getElementById('passportValidated').style.display = 'inline';
+            document.getElementById('passportNotValidated').style.display = 'none';
+            document.getElementById('uploadImageContainer').style.display = 'none'; 
+        } else {
+            document.getElementById('passportValidated').style.display = 'none';
+            document.getElementById('passportNotValidated').style.display = 'inline';
+            document.getElementById('uploadImageContainer').style.display = 'block'; 
+        }
+    }).catch(error => {
+        console.error('Error during OCR processing:', error);
+        document.getElementById('loadingSpinner').style.display = 'none'; 
+        document.getElementById('passportValidated').style.display = 'none';
+        document.getElementById('passportNotValidated').style.display = 'inline';
+        document.getElementById('uploadImageContainer').style.display = 'block'; 
+    });
+}
+
+function validateText(extractedText) {
+    if (!extractedText) {
+        return { isValid: false, details: { error: "Failed to extract text" } };
+    }
+
+    const barcodes = ['<', '<<', '<<<', '<<<<', '<<<<<', '<<<<<<'];
+    const lines = extractedText.split('\n').map(line => line.trim());
+    const isValid = lines.some(line => barcodes.some(barcode => line.includes(barcode)));
+
+    return { isValid, details: isValid ? {} : { error: "Passport format not recognized" } };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('static/service-worker.js').then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+    }).catch(function(error) {
+        console.log('Service Worker registration failed:', error);
+    });
+}
+
+const gateStatus = localStorage.getItem('gateStatus');
+const boardingPercent = localStorage.getItem('boardingPercent');
+const flightNumber = localStorage.getItem('flightNumber'); // Retrieve flight number from local storage
+
+function showNotification(notificationBody) {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        alert(notificationBody);
+    } else {
+        if (Notification.permission === 'granted') {
+            new Notification('Gate Status', {
+                body: notificationBody,
+                icon: '/static/images/gmr.png' 
+            });
+        } else if (Notification.permission === 'denied') {
+            alert(notificationBody);
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('Gate Status', {
+                        body: notificationBody,
+                        icon: '/static/images/gmr.png' 
+                    });
+                } else {
+                    alert(notificationBody);
+                }
+            });
+        }
+    }
+}
+
+function sendFlightNumberToAPI() {
+    if (!flightNumber) return;
+
+    fetch('/store_boarding_gate_status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ flno: flightNumber })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status && data.status.toLowerCase() === 'gateclosed') {
+            clearInterval(statusInterval);
+            alert('Gate is closed. No further updates will be provided.');
+        } else {
+            let notificationBody = `Flight Number: ${flightNumber}\nStatus: ${data.gateStatus || 'Unknown'}`;
+            if (data.gateStatus.toLowerCase() === 'gateopened' && data.boardingPercent) {
+                notificationBody += `\nBoarding: ${data.boardingPercent}%`;
+            }
+            showNotification(notificationBody);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while fetching the boarding gate status.');
+    });
+}
+
+// If gateStatus is present, handle notifications
+if (gateStatus) {
+    let notificationBody = `Flight Number: ${flightNumber}\nStatus: ${gateStatus}`;
+
+    if (gateStatus.toLowerCase() === 'gateopened' && boardingPercent) {
+        notificationBody += `\nBoarding: ${boardingPercent}%`;
+    }
+
+    showNotification(notificationBody);
+
+    const statusInterval = setInterval(() => {
+        sendFlightNumberToAPI();
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    // Move flightNumber to sessionStorage before clearing localStorage
+    sessionStorage.setItem('flightNumber', flightNumber);
+    localStorage.removeItem('flightNumber');
+    localStorage.removeItem('gateStatus');
+    localStorage.removeItem('boardingPercent');
+} else {
+    console.log('No gate status available.');
+    
+}
+
+// Redirect to home if no flight number is found
+if (!flightNumber) {
+    window.location.href = '/';
+}
+});
+
+
+
+
+
+       document.addEventListener("DOMContentLoaded", function() {
+        const faqQuestions = document.querySelectorAll(".faq-question");
+
+        faqQuestions.forEach(question => {
+            question.addEventListener("click", function() {
+                this.classList.toggle("active");
+
+                let answer = this.nextElementSibling;
+
+                faqQuestions.forEach(otherQuestion => {
+                    if (otherQuestion !== question && otherQuestion.classList.contains("active")) {
+                        otherQuestion.classList.remove("active");
+                        otherQuestion.nextElementSibling.style.display = "none";
+                    }
+                });
+
+                if (answer.style.display === "block") {
+                    answer.style.display = "none";
+                } else {
+                    answer.style.display = "block";
+                }
+            });
+        });
+    });
+
+         
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        function redirectToChat() {
+            sessionStorage.setItem('startedChat', 'true');
+            window.location.href = "/index";
+        }
+
+        window.onload = function () {
+            if (sessionStorage.getItem('startedChat')) {
+                window.location.href = "/index";
+            }
+        };
+
+        function toggleSubcategories(event) {
+            event.stopPropagation();
+            const sidebar = document.getElementById('sidebar');
+            const subcategory = document.getElementById('travellers-subcategory');
+            subcategory.style.display = subcategory.style.display === 'flex' ? 'none' : 'flex';
+            sidebar.classList.remove('active');
+        }
+
+        function closeSidebar(event) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('active') && !sidebar.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function (event) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('active') && !sidebar.contains(event.target) && !event.target.classList.contains('menu-icon')) {
+                sidebar.classList.remove('active');
+            }
+        });
+        window.onload = function () {
+            scrollToTop();
+            if (sessionStorage.getItem('startedChat')) {
+                window.location.href = "/index";
+            }
+        };
+
+        document.querySelectorAll('.sidebar a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        function updateDateTime() {
+            const dateTimeElement = document.getElementById('currentDateTime');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+            const currentDateTime = new Date().toLocaleString('en-US', options);
+            dateTimeElement.textContent = currentDateTime;
+        }
+
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+
+
+
+        function showDialog() {
+    document.getElementById('wifiDialog').style.display = 'flex';
+    resetDialog();
+}
+
+function hideDialog() {
+    document.getElementById('wifiDialog').style.display = 'none';
+}
+
+function showFlightNo() {
+    document.getElementById('pnrField').style.display = 'none';
+    document.getElementById('uploadFileFieldDomestic').style.display = 'none';
+    document.getElementById('flightNoField').style.display = 'block';
+    document.getElementById('uploadFileFieldInternational').style.display = 'block';
+    document.getElementById('photoField').style.display = 'block';
+    document.getElementById('passportField').style.display = 'block';
+    document.getElementById('submitButton').style.display = 'block';
+}
+
+function showPNR() {
+    document.getElementById('pnrField').style.display = 'block';
+    document.getElementById('uploadFileFieldDomestic').style.display = 'block';
+    document.getElementById('flightNoField').style.display = 'none';
+    document.getElementById('uploadFileFieldInternational').style.display = 'none';
+    document.getElementById('photoField').style.display = 'none';
+    document.getElementById('passportField').style.display = 'none';
+    document.getElementById('submitButton').style.display = 'block';
+}
+function resetDialog() {
+    document.getElementById('pnrField').style.display = 'none';
+    document.getElementById('flightNoField').style.display = 'none';
+    document.getElementById('uploadFileFieldDomestic').style.display = 'none';
+    document.getElementById('uploadFileFieldInternational').style.display = 'none';
+    document.getElementById('photoField').style.display = 'none';
+    document.getElementById('passportField').style.display = 'none';
+    document.getElementById('submitButton').style.display = 'none';
+
+   
+    document.getElementById('pnr').value = '';
+    document.getElementById('flightNo').value = '';
+    document.getElementById('uploadFileDomestic').value = '';
+    document.getElementById('uploadFileInternational').value = '';
+
+   
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoPreview').src = '';
+    document.getElementById('photoValidated').style.display = 'none';
+
+    document.getElementById('passportPreview').style.display = 'none';
+    document.getElementById('passportPreview').src = '';
+    document.getElementById('passportValidated').style.display = 'none';
+    document.getElementById('passportNotValidated').style.display = 'none';
+    document.getElementById('uploadImageContainer').style.display = 'none'; 
+    document.getElementById('loadingSpinner').style.display = 'none';
+
+   
+    photoValidated = false;
+
+    
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        document.getElementById('videoContainer').style.display = 'none';
+    }
+    if (passportStream) {
+        passportStream.getTracks().forEach(track => track.stop());
+        document.getElementById('passportVideoContainer').style.display = 'none';
+    }
+
+    
+    document.getElementById('formContainer').style.display = 'block';
+    document.getElementById('resultContainer').style.display = 'none';
+
+    document.getElementById('resultMessage').innerText = '';
+}
+
+
+
+        function openCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    document.getElementById('video').srcObject = stream;
+                    videoStream = stream;
+                    document.getElementById('videoContainer').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error("Error accessing camera:", error);
+                    alert('Unable to access camera.');
+                });
+        }
+
+        function takePhoto() {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const video = document.getElementById('video');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const photoPreview = document.getElementById('photoPreview');
+            photoPreview.src = canvas.toDataURL('image/png');
+            photoPreview.style.display = 'block';
+            document.getElementById('photoValidated').style.display = 'inline';
+
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            
+            document.getElementById('videoContainer').style.display = 'none';
+
+            photoValidated = true;
+        }
+
+         function handleSubmit(event) {
+    event.preventDefault();
+
+    let formData = {};
+    const isPNRVisible = document.getElementById('pnrField').style.display !== 'none';
+
+    if (isPNRVisible) {
+        formData.pnr = document.getElementById('pnr').value.trim();
+        if (!formData.pnr) {
+            showNotification('Please enter PNR!');
+            return false;
+        }
+        const uploadFileDomestic = document.getElementById('uploadFileDomestic').files[0];
+        if (!uploadFileDomestic) {
+            showNotification('Please upload your boarding pass!');
+            return false;
+        }
+        formData.uploadFileDomestic = uploadFileDomestic;
+    } else {
+        formData.flightNo = document.getElementById('flightNo').value.trim();
+        if (!formData.flightNo) {
+            showNotification('Please enter Flight No!');
+            return false;
+        }
+        const uploadFileInternational = document.getElementById('uploadFileInternational').files[0];
+        if (!uploadFileInternational) {
+            showNotification('Please upload your boarding pass!');
+            return false;
+        }
+        formData.uploadFileInternational = uploadFileInternational;
+
+        const photoPreview = document.getElementById('photoPreview').src;
+        const photoValidated = document.getElementById('photoValidated').style.display !== 'none';
+        if (document.getElementById('photoField').style.display !== 'none' && (!photoPreview || !photoValidated)) {
+            showNotification('Please take a photo!');
+            return false;
+        }
+        formData.photo = photoPreview;
+
+        const passportPreview = document.getElementById('passportPreview').src;
+        const passportValidated = document.getElementById('passportValidated').style.display !== 'none';
+        if (!passportPreview || !passportValidated) {
+            showNotification('Please take a passport photo!');
+            return false;
+        }
+        formData.passportPhoto = passportPreview;
+    }
+
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    document.getElementById('loadingIndicator').style.display = 'block';
+
+    if (isPNRVisible) {
+        validatePassenger(formData, 'Domestic');
+    } else {
+        validatePassenger(formData, 'International');
+    }
+    return false;
+}
+
+
+function showNotification(message) {
+    var notification = document.getElementById('notification');
+    notification.innerHTML = message;
+    notification.style.display = 'block';
+
+    setTimeout(function() {
+        notification.style.display = 'none';
+    }, 2000);
+}
+
+function validatePassenger(formData, type) {
+        let url;
+        let payload = {
+            "currentDate": new Date().toISOString().slice(0, 10)
+        };
+
+        if (type === 'Domestic') {
+            url = '/validate_passenger';
+            payload.pnr = formData.pnr;
+        } else if (type === 'International') {
+            url = '/validate_flight';
+            payload.flightNo = formData.flightNo;
+        }
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const resultMessage = document.getElementById('resultMessage');
+            if (data.success) {
+                resultMessage.innerText = `WiFi Coupon Code: ${data.couponCode}`;
+            } else {
+                resultMessage.innerText = `Failed to validate passenger. Reason: ${data.message}`;
+            }
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const resultMessage = document.getElementById('resultMessage');
+            resultMessage.innerText = 'An error occurred while validating passenger. Please try again later.';
+        })
+        .finally(() => {
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.disabled = false; 
+            document.getElementById('loadingIndicator').style.display = 'none'; 
+        });
+    }
+
+
+function copyToClipboard() {
+    const resultMessage = document.getElementById('resultMessage').innerText;
+    const couponCode = resultMessage.split(': ')[1];
+    const tempInput = document.createElement('input');
+    tempInput.value = couponCode;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    alert('Coupon code copied to clipboard!');
+}    
+    </script>
+</body>
+
+</html>
